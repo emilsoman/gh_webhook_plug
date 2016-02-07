@@ -7,6 +7,8 @@ defmodule GhWebhookPlug.Mixfile do
      elixir: "~> 1.1",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     description: description,
+     package: package,
      deps: deps]
   end
 
@@ -15,11 +17,7 @@ defmodule GhWebhookPlug.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     [
-      applications: [:logger, :plug],
-      env: [
-        route: '/gh-webhook',
-        default_function: :"gh-webhook"
-      ]
+      applications: [:plug]
     ]
   end
 
@@ -34,5 +32,20 @@ defmodule GhWebhookPlug.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [{:plug, "~>1.1.0"}]
+  end
+
+  defp description do
+    """
+    This Plug makes it easy to listen and respond to Github webhook requests
+    in your Elixir apps.
+    """
+  end
+
+  defp package do
+    [# These are the default files included in the package
+     files: ["lib", "mix.exs", "README.md"],
+     maintainers: ["Emil Soman"],
+     licenses: ["MIT"],
+     links: %{"GitHub" => "https://github.com/emilsoman/gh_webhook_plug"}]
   end
 end

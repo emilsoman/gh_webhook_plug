@@ -1,10 +1,15 @@
 # GhWebhookPlug
 
-**TODO: Add description**
+This Plug makes it easy to listen to Github webhook requests in your Elixir
+apps and trigger actions.
+
+Features:
+
+* Configurable HTTP endpoint
+* Verifies authenticity using webhook secret
+* Responses are handled for you - just write business logic
 
 ## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed as:
 
   1. Add gh_webhook_plug to your list of dependencies in `mix.exs`:
 
@@ -17,3 +22,29 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
         def application do
           [applications: [:gh_webhook_plug]]
         end
+
+## Usage
+
+```elixir
+defmodule DemoPlugApp do
+  use Plug.Builder
+
+  # Use GhWebhookPlug and pass it 3 things:
+  # 1. secret : the secret you configured when you set up the Github webhook
+  # 2. path : The HTTP endpoint which should listen for webhook requests
+  # 3. action: Tuple containing the module and function which should handle the webhook payload
+  plug GhWebhookPlug, secret: "secret", path: "/gh-webhook", action: {__MODULE__, :gh_webhook}
+
+  # You can add other plugs as you normally would.
+  # The connection reaches this plug if the webhook's path is not matched above.
+  plug :next_in_chain
+
+  def gh_webhook(payload) do
+    # Do something with payload
+  end
+end
+```
+
+## License
+
+MIT
