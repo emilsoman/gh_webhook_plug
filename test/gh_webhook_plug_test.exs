@@ -19,6 +19,7 @@ defmodule GhWebhookPlugTest do
     end
   end
 
+
   test "when verification fails, returns a 403" do
     conn = conn(:get, "/gh-webhook", "hello world") |> put_req_header("x-hub-signature", "sha1=wrong_hexdigest")
     |> DemoPlug.call([])
@@ -45,5 +46,67 @@ defmodule GhWebhookPlugTest do
     assert conn.status == 200
     assert !Process.get(:payload)
     assert Process.get(:next_in_chain_called)
+  end
+
+  test "when secret is set in ENV var, it need not be set in param" do
+    # Demo plug where secret is in ENV var
+    defmodule DemoPlugEnv do
+      use Plug.Builder
+
+      plug GhWebhookPlug, path: "/gh-webhook", action: {__MODULE__, :'gh_webhook'}
+
+      def gh_webhook(payload) do
+        Process.put(:payload, payload)
+      end
+    end
+
+    System.put_env("GH_WEBHOOK_SECRET", "secret")
+    hexdigest = "sha1=" <> (:crypto.hmac(:sha, "secret", "hello world") |> Base.encode16(case: :lower))
+    conn = conn(:get, "/gh-webhook", "hello world") |> put_req_header("x-hub-signature", hexdigest)
+    |> DemoPlugEnv.call([])
+
+    assert conn.status == 200
+    assert Process.get(:payload) == "hello world"
+  end
+
+  test "when secret set in param, it takes presedence over ENV var" do
+    # Demo plug where secret is in ENV var
+    defmodule DemoPlugParamPresendence do
+      use Plug.Builder
+
+      plug GhWebhookPlug, secret: "secret",path: "/gh-webhook", action: {__MODULE__, :'gh_webhook'}
+
+      def gh_webhook(payload) do
+        Process.put(:payload, payload)
+      end
+    end
+    System.put_env("GH_WEBHOOK_SECRET", "wrong")
+    hexdigest = "sha1=" <> (:crypto.hmac(:sha, "secret", "hello world") |> Base.encode16(case: :lower))
+    conn = conn(:get, "/gh-webhook", "hello world") |> put_req_header("x-hub-signature", hexdigest)
+    |> DemoPlugParamPresendence.call([])
+
+    assert conn.status == 200
+    assert Process.get(:payload) == "hello world"
+  end
+
+  test "when secret set is not set in params or ENV var, it assumes an empty secret" do
+    # Demo plug where secret is in ENV var
+    defmodule DemoPlugNoSecret do
+      use Plug.Builder
+
+      plug GhWebhookPlug, path: "/gh-webhook", action: {__MODULE__, :'gh_webhook'}
+
+      def gh_webhook(payload) do
+        Process.put(:payload, payload)
+      end
+    end
+
+    System.delete_env("GH_WEBHOOK_SECRET")
+    hexdigest = "sha1=" <> (:crypto.hmac(:sha, "", "hello world") |> Base.encode16(case: :lower))
+      conn = conn(:get, "/gh-webhook", "hello world") |> put_req_header("x-hub-signature", hexdigest)
+      |> DemoPlugNoSecret.call([])
+
+    assert conn.status == 200
+    assert Process.get(:payload) == "hello world"
   end
 end

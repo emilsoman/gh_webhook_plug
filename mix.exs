@@ -17,7 +17,7 @@ defmodule GhWebhookPlug.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     [
-      applications: [:plug]
+      applications: [:plug, :logger]
     ]
   end
 

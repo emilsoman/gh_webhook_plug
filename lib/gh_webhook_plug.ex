@@ -1,18 +1,20 @@
 defmodule GhWebhookPlug do
   import Plug.Conn
+  require Logger
 
   def init(options) do
     options
   end
 
   def call(conn, options) do
+    secret = options[:secret] || get_secret
     path = options[:path]
     case conn.request_path do
       ^path ->
         {module, function} = get_module_function_from_opts(options[:action])
         {:ok, payload, _conn} = read_body(conn)
         [signature_in_header] = get_req_header(conn, "x-hub-signature")
-        if verify_signature(payload, options[:secret], signature_in_header) do
+        if verify_signature(payload, secret, signature_in_header) do
           apply(module, function, [payload])
           conn |> send_resp(200, "OK") |> halt
         else
@@ -33,5 +35,14 @@ defmodule GhWebhookPlug do
   defp verify_signature(payload, secret, signature_in_header) do
     signature = "sha1=" <> (:crypto.hmac(:sha, secret, payload) |> Base.encode16(case: :lower))
     Plug.Crypto.secure_compare(signature, signature_in_header)
+  end
+
+  defp get_secret do
+    case(System.get_env("GH_WEBHOOK_SECRET") || Application.fetch_env(:gh_webhook_plug, :secret)) do
+      :error ->
+        Logger.warn "Github webhook secret is not configured."
+        ""
+      secret -> secret
+    end
   end
 end

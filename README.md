@@ -48,7 +48,6 @@ end
 ## TODO
 
 * Add polymorphic handlers for different types of GH events which are overridable by user.
-* Make configuration possible using ENV vars which would be evaluated at runtime rather than compile time.
 
 ## License
 
