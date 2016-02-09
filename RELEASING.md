@@ -3,11 +3,12 @@
 ## Checklist
 
 * Run mix test
-* Ensure `CHANGELOG.md` is up-to-date
+* Ensure `CHANGELOG.md` is up to date
 * Update version in `mix.exs`
 * Create a commit:
 
-      git commit -a -m "Bump version to 0.X.Y"
-      git tag -l v0.X.Y
+      git add .
+      git commit -m "Bump version to 0.0.1"
+      git tag v0.0.1
       mix hex.publish
       git push origin master --tags
