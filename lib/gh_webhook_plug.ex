@@ -7,10 +7,10 @@ defmodule GhWebhookPlug do
   end
 
   def call(conn, options) do
-    secret = options[:secret] || get_secret
     path = options[:path]
     case conn.request_path do
       ^path ->
+        secret = options[:secret] || get_secret
         {module, function} = get_module_function_from_opts(options[:action])
         {:ok, payload, _conn} = read_body(conn)
         [signature_in_header] = get_req_header(conn, "x-hub-signature")
