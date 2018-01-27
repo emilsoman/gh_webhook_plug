@@ -7,29 +7,24 @@ defmodule GhWebhookPlug do
   end
 
   def call(conn, options) do
-    path = options[:path]
+    path = get_config(options, :path)
     case conn.request_path do
       ^path ->
-        secret = options[:secret] || get_secret
-        {module, function} = get_module_function_from_opts(options[:action])
+        secret = get_config(options, :secret)
+        {module, function} = get_config(options, :action)
+
         {:ok, payload, _conn} = read_body(conn)
         [signature_in_header] = get_req_header(conn, "x-hub-signature")
+
         if verify_signature(payload, secret, signature_in_header) do
           apply(module, function, [payload])
-          conn |> send_resp(200, "OK") |> halt
+          conn |> send_resp(200, "OK") |> halt()
         else
-          conn |> send_resp(403, "Forbidden") |> halt
+          conn |> send_resp(403, "Forbidden") |> halt()
         end
+
       _ -> conn
     end
-  end
-
-  def get_module_function_from_opts({module, function} = _action) do
-    {module, function}
-  end
-
-  def get_module_function_from_opts(_) do
-    raise "Action for Github webhook should be a tuple {<module>, <function>}, example: {__MODULE__, :gh_webhook_handler}"
   end
 
   defp verify_signature(payload, secret, signature_in_header) do
@@ -37,12 +32,17 @@ defmodule GhWebhookPlug do
     Plug.Crypto.secure_compare(signature, signature_in_header)
   end
 
-  defp get_secret do
-    case(System.get_env("GH_WEBHOOK_SECRET") || Application.get_env(:gh_webhook_plug, :secret)) do
+  defp get_config(options, key) do
+    options[key] || get_config(key)
+  end
+
+  defp get_config(key) do
+    case Application.get_env(:gh_webhook_plug, key) do
       nil ->
-        Logger.warn "Github webhook secret is not configured."
+        Logger.warn "GhWebhookPlug config key #{inspect key} is not configured."
         ""
-      secret -> secret
+
+      val -> val
     end
   end
 end
