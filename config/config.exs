@@ -10,11 +10,11 @@ use Mix.Config
 
 # You can configure for your application as:
 #
-#     config :gh_webhook_plug, key: :value
+#     config :gh_webhook_plug, secret: :value
 #
 # And access this configuration in your application as:
 #
-#     Application.get_env(:gh_webhook_plug, :key)
+#     Application.get_env(:gh_webhook_plug, :secret)
 #
 # Or configure a 3rd-party app:
 #

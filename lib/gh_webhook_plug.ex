@@ -38,8 +38,8 @@ defmodule GhWebhookPlug do
   end
 
   defp get_secret do
-    case(System.get_env("GH_WEBHOOK_SECRET") || Application.fetch_env(:gh_webhook_plug, :secret)) do
-      :error ->
+    case(System.get_env("GH_WEBHOOK_SECRET") || Application.get_env(:gh_webhook_plug, :secret)) do
+      nil ->
         Logger.warn "Github webhook secret is not configured."
         ""
       secret -> secret

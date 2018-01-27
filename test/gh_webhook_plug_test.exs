@@ -89,7 +89,29 @@ defmodule GhWebhookPlugTest do
     assert Process.get(:payload) == "hello world"
   end
 
-  test "when secret set is not set in params or ENV var, it assumes an empty secret" do
+  test "when secret set is not set in params or ENV var, it uses application setting" do
+    # Demo plug where secret is in Application config
+    defmodule DemoPlugApplicationSecret do
+      use Plug.Builder
+
+      plug GhWebhookPlug, path: "/gh-webhook", action: {__MODULE__, :'gh_webhook'}
+
+      def gh_webhook(payload) do
+        Process.put(:payload, payload)
+      end
+    end
+
+    System.delete_env("GH_WEBHOOK_SECRET")
+    Application.put_env(:gh_webhook_plug, :secret, "1234")
+    hexdigest = "sha1=" <> (:crypto.hmac(:sha, "1234", "hello world") |> Base.encode16(case: :lower))
+    conn = conn(:get, "/gh-webhook", "hello world") |> put_req_header("x-hub-signature", hexdigest)
+    |> DemoPlugApplicationSecret.call([])
+
+    assert conn.status == 200
+    assert Process.get(:payload) == "hello world"
+  end
+
+  test "when secret set is not set in params or ENV var or Application setting, it assumes an empty secret" do
     # Demo plug where secret is in ENV var
     defmodule DemoPlugNoSecret do
       use Plug.Builder
@@ -102,6 +124,7 @@ defmodule GhWebhookPlugTest do
     end
 
     System.delete_env("GH_WEBHOOK_SECRET")
+    Application.delete_env(:gh_webhook_plug, :secret)
     hexdigest = "sha1=" <> (:crypto.hmac(:sha, "", "hello world") |> Base.encode16(case: :lower))
       conn = conn(:get, "/gh-webhook", "hello world") |> put_req_header("x-hub-signature", hexdigest)
       |> DemoPlugNoSecret.call([])
