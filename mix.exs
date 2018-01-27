@@ -7,7 +7,8 @@ defmodule GhWebhookPlug.Mixfile do
      elixir: "~> 1.5",
      description: description(),
      package: package(),
-     deps: deps()]
+     deps: deps(),
+     docs: docs()]
   end
 
   def application do
@@ -17,7 +18,10 @@ defmodule GhWebhookPlug.Mixfile do
   end
 
   defp deps do
-    [{:plug, "~>1.4"}]
+    [
+      {:plug, "~>1.4"},
+      {:ex_doc, "~> 0.3", only: :dev}
+    ]
   end
 
   defp description do
@@ -33,5 +37,9 @@ defmodule GhWebhookPlug.Mixfile do
      maintainers: ["Emil Soman"],
      licenses: ["MIT"],
      links: %{"GitHub" => "https://github.com/emilsoman/gh_webhook_plug"}]
+  end
+
+  defp docs do
+    [extras: ["README.md"]]
   end
 end

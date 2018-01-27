@@ -6,6 +6,9 @@ defmodule GhWebhookPlug do
     options
   end
 
+  @doc """
+  Verifies secret and calls a handler with the webhook payload
+  """
   def call(conn, options) do
     path = get_config(options, :path)
     case conn.request_path do
