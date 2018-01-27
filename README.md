@@ -1,7 +1,7 @@
 # GhWebhookPlug
 
 This Plug makes it easy to listen to Github webhook requests in your Elixir
-apps and trigger actions.
+and Phoenix apps and trigger actions.
 
 Features:
 
@@ -11,43 +11,57 @@ Features:
 
 ## Installation
 
-  1. Add gh_webhook_plug to your list of dependencies in `mix.exs`:
+Add gh_webhook_plug to your list of dependencies in `mix.exs`:
 
-        def deps do
-          [{:gh_webhook_plug, "~> 0.0.1"}]
-        end
-
-  2. Ensure gh_webhook_plug is started before your application:
-
-        def application do
-          [applications: [:gh_webhook_plug]]
-        end
+```elixir
+def deps do
+  [{:gh_webhook_plug, "~> 0.0.4"}]
+end
+```
 
 ## Usage
 
+Inside a phoenix app, add this line in the Endpoint module:
+
 ```elixir
-defmodule DemoPlugApp do
-  use Plug.Builder
+defmodule MyApp.Endpoint do
 
-  # Use GhWebhookPlug and pass it 3 things:
-  # 1. secret : the secret you configured when you set up the Github webhook
-  # 2. path : The HTTP endpoint which should listen for webhook requests
-  # 3. action: Tuple containing the module and function which should handle the webhook payload
-  plug GhWebhookPlug, secret: "secret", path: "/gh-webhook", action: {__MODULE__, :gh_webhook}
+  # Add this line above Plug.Parsers plug:
+  plug GhWebhookPlug,
+    secret: "secret"
+    path: "/github_webhook",
+    action: {MyApp.GithubWebhook, :handle}
 
-  # You can add other plugs as you normally would.
-  # The connection reaches this plug if the webhook's path is not matched above.
-  plug :next_in_chain
+  # Rest of the plugs
+end
+```
 
-  def gh_webhook(payload) do
-    # Do something with payload
+Now you can write the handler like this:
+
+```elixir
+defmodule MyApp.GithubWebhook do
+  def handle(payload) do
+    # Handle webhook payload here
   end
 end
 ```
 
-## TODO
+## Configuration
 
-* Add polymorphic handlers for different types of GH events which are overridable by user.
+Add this to your configuration file (`config/config.exs`):
+
+```elixir
+config :gh_webhook_plug,
+  # Secret set in webhook settings page of the Github repository
+  secret: "foobar",
+  # Path that will be intercepted by GhWebhookPlug
+  path: "/api/github_webhook",
+  # Module and function that will be used to handle the webhook payload
+  action: {MyApp.GithubWebhook, :handle}
+```
+
+These configurations can also be set via options to the plug as shown in the
+example in the Usage section.
 
 ## License
 
