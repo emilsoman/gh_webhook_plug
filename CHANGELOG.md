@@ -12,3 +12,8 @@ v0.0.4
 ======
 
 * Drop support for ENV vars, make everything configurable using Mix.Config
+
+v0.0.5
+======
+
+* Pass conn to handler

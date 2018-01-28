@@ -40,8 +40,9 @@ Now you can write the handler like this:
 
 ```elixir
 defmodule MyApp.GithubWebhook do
-  def handle(payload) do
+  def handle(conn, payload) do
     # Handle webhook payload here
+    # Return value of this function is ignored
   end
 end
 ```

@@ -9,7 +9,7 @@ defmodule GhWebhookPlugTest do
     plug GhWebhookPlug, secret: "secret", path: "/gh-webhook", action: {__MODULE__, :'gh_webhook'}
     plug :next_in_chain
 
-    def gh_webhook(payload) do
+    def gh_webhook(_conn, payload) do
       Process.put(:payload, payload)
     end
 
@@ -55,7 +55,7 @@ defmodule GhWebhookPlugTest do
 
       plug GhWebhookPlug, secret: "secret",path: "/gh-webhook", action: {__MODULE__, :'gh_webhook'}
 
-      def gh_webhook(payload) do
+      def gh_webhook(_conn, payload) do
         Process.put(:payload, payload)
       end
     end
@@ -76,7 +76,7 @@ defmodule GhWebhookPlugTest do
 
       plug GhWebhookPlug, path: "/gh-webhook", action: {__MODULE__, :'gh_webhook'}
 
-      def gh_webhook(payload) do
+      def gh_webhook(_conn, payload) do
         Process.put(:payload, payload)
       end
     end
@@ -97,7 +97,7 @@ defmodule GhWebhookPlugTest do
 
       plug GhWebhookPlug, path: "/gh-webhook", action: {__MODULE__, :'gh_webhook'}
 
-      def gh_webhook(payload) do
+      def gh_webhook(_conn, payload) do
         Process.put(:payload, payload)
       end
     end

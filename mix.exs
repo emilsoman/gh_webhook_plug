@@ -3,7 +3,7 @@ defmodule GhWebhookPlug.Mixfile do
 
   def project do
     [app: :gh_webhook_plug,
-     version: "0.0.4",
+     version: "0.0.5",
      elixir: "~> 1.5",
      description: description(),
      package: package(),

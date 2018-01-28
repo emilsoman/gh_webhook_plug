@@ -20,7 +20,7 @@ defmodule GhWebhookPlug do
         [signature_in_header] = get_req_header(conn, "x-hub-signature")
 
         if verify_signature(payload, secret, signature_in_header) do
-          apply(module, function, [payload])
+          apply(module, function, [conn, payload])
           conn |> send_resp(200, "OK") |> halt()
         else
           conn |> send_resp(403, "Forbidden") |> halt()
