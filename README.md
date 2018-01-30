@@ -15,7 +15,7 @@ Add gh_webhook_plug to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
-  [{:gh_webhook_plug, "~> 0.0.4"}]
+  [{:gh_webhook_plug, "~> 0.0.5"}]
 end
 ```
 
