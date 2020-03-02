@@ -28,7 +28,7 @@ defmodule MyApp.Endpoint do
 
   # Add this line above Plug.Parsers plug:
   plug GhWebhookPlug,
-    secret: "secret"
+    secret: "secret",
     path: "/github_webhook",
     action: {MyApp.GithubWebhook, :handle}
 
